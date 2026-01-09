@@ -1,24 +1,41 @@
 package com.gateway.dto;
 
 public class ErrorResponse {
+
     private Error error;
 
-    public ErrorResponse(String code, String description){
-        this.error = new Error(code, description);
+    public ErrorResponse() {
     }
 
-    public static class Error {
-        private String code;
-        private String description;
+    public ErrorResponse(String message) {
+        this.error = new Error(message);
+    }
 
-        public Error(String code, String description){
-            this.code = code;
-            this.description = description;
+    public Error getError() {
+        return error;
+    }
+
+    public void setError(Error error) {
+        this.error = error;
+    }
+
+    // Make inner class static so Jackson can serialize it
+    public static class Error {
+        private String message;
+
+        public Error() {
         }
 
-        // Getters
-    }
+        public Error(String message) {
+            this.message = message;
+        }
 
-    // Getter for error
-    public Error getError() { return error; }
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
 }

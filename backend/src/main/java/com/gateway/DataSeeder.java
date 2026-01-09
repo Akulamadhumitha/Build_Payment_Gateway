@@ -1,7 +1,11 @@
 package com.gateway;
 
-import com.gateway.model.Merchant;
-import com.gateway.repository.MerchantRepository;
+import com.gateway.models.Merchant;
+import com.gateway.models.Order;
+
+
+import com.gateway.repositories.MerchantRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

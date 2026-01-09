@@ -1,14 +1,12 @@
-package com.gateway.repository;
+package com.gateway.repositories;
 
-import com.gateway.model.Merchant;
+import com.gateway.models.Merchant;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public interface MerchantRepository extends JpaRepository<Merchant, UUID> {
-
-    boolean existsByEmail(String email);
-
     Optional<Merchant> findByApiKey(String apiKey);
+    boolean existsByEmail(String email); // 👈 REQUIRED (error mentioned this)
 }

@@ -1,4 +1,5 @@
-package com.gateway.model;
+package com.gateway.models;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

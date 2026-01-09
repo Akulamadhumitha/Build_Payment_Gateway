@@ -1,4 +1,4 @@
-package com.gateway.model;
+package com.gateway.models;
 
 import jakarta.persistence.*;
 import java.time.Instant;
