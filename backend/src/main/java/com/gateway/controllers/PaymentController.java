@@ -131,4 +131,35 @@ public class PaymentController {
 
         return ResponseEntity.status(201).body(payment);
     }
+    @GetMapping("/{paymentId}")
+public ResponseEntity<?> getPayment(
+        @RequestHeader("X-Api-Key") String apiKey,
+        @RequestHeader("X-Api-Secret") String apiSecret,
+        @PathVariable String paymentId
+) {
+
+    // 🔐 Authenticate merchant
+    Merchant merchant = merchantRepo.findByApiKey(apiKey).orElse(null);
+    if (merchant == null || !merchant.getApiSecret().equals(apiSecret)) {
+        return ResponseEntity.status(401)
+                .body(new ErrorResponse("Invalid API credentials"));
+    }
+
+    // 💳 Fetch payment
+    Payment payment = paymentRepo.findById(paymentId).orElse(null);
+    if (payment == null) {
+        return ResponseEntity.status(404)
+                .body(new ErrorResponse("Payment not found"));
+    }
+
+    // 🔒 Authorization check
+    if (!payment.getMerchantId().equals(merchant.getId())) {
+        return ResponseEntity.status(403)
+                .body(new ErrorResponse("Access denied"));
+    }
+
+    // ✅ Success
+    return ResponseEntity.ok(payment);
+}
+
 }
