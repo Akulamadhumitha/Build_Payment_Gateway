@@ -1,41 +1,81 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalTransactions: 0,
+    totalAmount: 0,
+    successRate: 0,
+  });
 
   useEffect(() => {
-    // Redirect to login if not logged in
-    if (localStorage.getItem('loggedIn') !== 'true') {
-      navigate('/login');
-    }
-  }, [navigate]);
+    fetch("http://localhost:8000/api/dashboard/stats")
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch((err) => console.error("Stats fetch failed", err));
+  }, []);
 
   return (
-    <div style={styles.container}>
+    <div
+      data-test-id="dashboard"
+      style={{ padding: "40px", fontFamily: "Arial" }}
+    >
       <h1>Merchant Dashboard</h1>
 
-      <div style={styles.card}>
-        <p><strong>Email:</strong> test@example.com</p>
-        <p><strong>API Key:</strong> key_test_abc123</p>
-        <p><strong>API Secret:</strong> secret_test_xyz789</p>
+      {/* API Credentials */}
+      <div data-test-id="api-credentials" style={cardStyle}>
+        <div>
+          <label>API Key</label>
+          <div data-test-id="api-key">key_test_abc123</div>
+        </div>
+
+        <div>
+          <label>API Secret</label>
+          <div data-test-id="api-secret">secret_test_xyz789</div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div
+        data-test-id="stats-container"
+        style={{ display: "flex", gap: "20px", marginTop: "30px" }}
+      >
+        <div style={statBox}>
+          <div data-test-id="total-transactions">
+            {stats.totalTransactions}
+          </div>
+          <small>Total Transactions</small>
+        </div>
+
+        <div style={statBox}>
+          <div data-test-id="total-amount">
+            ₹{stats.totalAmount.toLocaleString()}
+          </div>
+          <small>Total Amount</small>
+        </div>
+
+        <div style={statBox}>
+          <div data-test-id="success-rate">
+            {stats.successRate}%
+          </div>
+          <small>Success Rate</small>
+        </div>
       </div>
     </div>
   );
 }
 
-const styles = {
-  container: {
-    minHeight: '100vh',
-    padding: '2rem',
-    background: '#f4f6f8',
-  },
-  card: {
-    background: '#fff',
-    padding: '1.5rem',
-    borderRadius: '10px',
-    maxWidth: '400px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    marginTop: '20px',
-  },
+const cardStyle = {
+  background: "#f9f9f9",
+  padding: "20px",
+  borderRadius: "10px",
+  maxWidth: "400px",
+};
+
+const statBox = {
+  background: "#ffffff",
+  padding: "20px",
+  borderRadius: "10px",
+  minWidth: "150px",
+  textAlign: "center",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
 };
