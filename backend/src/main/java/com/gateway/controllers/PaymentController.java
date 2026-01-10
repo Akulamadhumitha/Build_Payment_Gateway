@@ -1,5 +1,18 @@
 package com.gateway.controllers;
 
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.gateway.dto.CreatePaymentRequest;
 import com.gateway.dto.ErrorResponse;
 import com.gateway.models.Merchant;
@@ -9,11 +22,6 @@ import com.gateway.repositories.MerchantRepository;
 import com.gateway.repositories.OrderRepository;
 import com.gateway.repositories.PaymentRepository;
 import com.gateway.utils.PaymentValidationUtil;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -160,6 +168,59 @@ public ResponseEntity<?> getPayment(
 
     // ✅ Success
     return ResponseEntity.ok(payment);
+}
+@PostMapping("/public")
+public ResponseEntity<?> createPaymentPublic(@RequestBody Map<String, String> body)
+        throws InterruptedException {
+
+    String orderId = body.get("order_id");
+    String method = body.get("method");
+
+    // 🔍 Validate order
+    Order order = orderRepo.findById(orderId).orElse(null);
+    if (order == null) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("error", "Invalid order"));
+    }
+
+    // 🆔 Create payment
+    Payment payment = new Payment();
+    payment.setId("pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16));
+    payment.setOrderId(order.getId());
+    payment.setMerchantId(order.getMerchantId());
+    payment.setAmount(order.getAmount());
+    payment.setCurrency(order.getCurrency());
+    payment.setMethod(method);
+    payment.setStatus("processing");
+    payment.setCreatedAt(Instant.now());
+    payment.setUpdatedAt(Instant.now());
+
+    paymentRepo.save(payment);
+
+    // ⏳ Simulate processing
+    Thread.sleep(1000);
+
+    // ✅ Force success (for submission)
+    payment.setStatus("success");
+    payment.setUpdatedAt(Instant.now());
+    paymentRepo.save(payment);
+
+    return ResponseEntity.ok(payment);
+}
+@GetMapping("/{paymentId}/public")
+public ResponseEntity<?> getPaymentPublic(@PathVariable String paymentId) {
+    Payment payment = paymentRepo.findById(paymentId).orElse(null);
+    if (payment == null) {
+        return ResponseEntity.status(404)
+                .body(Map.of("error", "Payment not found"));
+    }
+
+    return ResponseEntity.ok(
+        Map.of(
+            "id", payment.getId(),
+            "status", payment.getStatus()
+        )
+    );
 }
 
 }
